@@ -1,0 +1,4 @@
+lightgbm==4.6.0
+pandas
+numpy
+matplotlib

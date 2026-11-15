@@ -155,6 +155,7 @@ def use_example(name):
 # ---------- Sidebar: the application ----------
 with st.sidebar:
     st.markdown("## Loan application")
+    st.caption("After typing a number, press Enter or click outside the box to update the result.")
     st.markdown("### The business")
     st.selectbox("State", CATS["State"], key="state")
     order = sorted(CATS["naics_sector"], key=lambda c: (c == "Unknown", SECTORS.get(c, c)))

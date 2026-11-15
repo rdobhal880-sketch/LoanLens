@@ -29,8 +29,6 @@ section[data-testid="stSidebar"] h3 { font-size: 0.92rem; font-weight: 700; colo
 .hint { color: var(--slate); font-size: 0.95rem; padding-top: 0.45rem; }
 .stButton button { border: 1px solid var(--ink); background: transparent; color: var(--ink); font-weight: 600;
   border-radius: 999px; }
-button[kind='segmented_controlActive'], [data-testid='stBaseButton-segmented_controlActive'] { background: var(--ink) !important; color: #fff !important; border-color: var(--ink) !important; }
-button[kind='segmented_controlActive'] p, [data-testid='stBaseButton-segmented_controlActive'] p { color: #fff !important; }
 .stButton button:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
 .hero { background: var(--bg); color: #fff; border-radius: 14px; padding: 1.9rem 2.1rem; margin: 0.9rem 0 1.6rem;
   display: flex; flex-wrap: wrap; gap: 1.5rem 3rem; align-items: flex-end; justify-content: space-between; }
@@ -77,7 +75,28 @@ button[kind='segmented_controlActive'] p, [data-testid='stBaseButton-segmented_c
   line-height: 1.55; }
 .proof li { break-inside: avoid; margin-bottom: 0.6rem; }
 .foot { color: var(--slate); font-size: 0.85rem; margin-top: 2rem; }
-@media (max-width: 760px) { .hero .word { font-size: 3.6rem; } .proof ul { columns: 1; }
+
+/* hide 'Press Enter to apply' hints that overlap the inputs (values apply on their own) */
+[data-testid="InputInstructions"] { display: none !important; }
+/* sidebar width and spacing */
+@media (min-width: 900px) { section[data-testid="stSidebar"] { min-width: 320px !important; } }
+section[data-testid="stSidebar"] .block-container, section[data-testid="stSidebar"] [data-testid="stSidebarContent"] { padding-top: 1.2rem; }
+/* economy selector: clear selected state */
+button[data-variant="segmented_control"] { border-color: var(--rule) !important; background: #fff !important; color: var(--ink) !important; }
+button[data-variant="segmented_control"] p { color: var(--ink) !important; font-weight: 500; }
+button[data-variant="segmented_control"][aria-checked="true"] { background: var(--ink) !important; border-color: var(--ink) !important; }
+button[data-variant="segmented_control"][aria-checked="true"] p { color: #fff !important; font-weight: 600; }
+/* example buttons: no wrapping */
+.stButton button p { white-space: nowrap; }
+/* hide the developer toolbar and its Deploy button */
+[data-testid="stToolbarActions"], [data-testid="stAppDeployButton"], .stAppDeployButton, [data-testid="stMainMenu"], [data-testid="stDecoration"], [data-testid="stStatusWidget"] { display: none !important; }
+[data-testid="stExpandSidebarButton"] { color: var(--ink) !important; }
+/* inputs: calm borders and focus ring */
+section[data-testid="stSidebar"] [data-baseweb="input"], section[data-testid="stSidebar"] [data-baseweb="select"] > div {
+  border-radius: 8px !important; }
+*:focus-visible { outline: 2px solid var(--ink) !important; outline-offset: 2px; }
+@media (max-width: 760px) { .hero { padding: 1.4rem 1.3rem; } .hero .word { font-size: 3.4rem; }
+  .hero .figs { gap: 1.2rem; flex-wrap: wrap; } .hero .fig b { font-size: 1.6rem; } .brand { font-size: 2.4rem; } .proof ul { columns: 1; }
   .drv, .drvhead { grid-template-columns: 8rem 1fr; } }
 </style>
 """, unsafe_allow_html=True)
@@ -142,14 +161,14 @@ with st.sidebar:
     st.selectbox("Industry", order, key="sector", format_func=lambda c: SECTORS.get(c, c),
                  help="The standard US industry sectors (NAICS). Pick 'Other or not listed' if none fits.")
     st.radio("Age", ["Existing business", "New business (under 2 years)"], key="age")
-    st.number_input("Employees", min_value=0, key="emp")
+    st.number_input("Employees", min_value=0, max_value=10_000, step=1, format="%d", key="emp")
     st.checkbox("Franchise", key="franchise")
     st.markdown("### The loan")
-    st.number_input("Amount ($)", min_value=1000, step=5000, key="amount")
+    st.number_input("Amount ($)", min_value=1000, max_value=5_000_000, step=5000, key="amount", format="%d")
     st.slider("Share guaranteed by the SBA (%)", 0, 100, step=5, key="sba",
               help="The SBA is a US government agency that repays the lender part of a failed loan.")
-    st.number_input("Jobs it will create", min_value=0, key="created")
-    st.number_input("Jobs it will keep", min_value=0, key="kept")
+    st.number_input("Jobs it will create", min_value=0, max_value=10_000, step=1, format="%d", key="created")
+    st.number_input("Jobs it will keep", min_value=0, max_value=10_000, step=1, format="%d", key="kept")
     st.checkbox("Revolving line of credit", key="revline")
     st.checkbox("Fast-track (LowDoc) paperwork", key="lowdoc")
     st.markdown("### The lender")
@@ -177,7 +196,7 @@ breakeven = gain / (gain + loss_if_default)                  # above this risk t
 # ---------- Header ----------
 st.markdown("<div class='brand'>LoanLens</div><p class='lede'>Would this small-business loan still make sense if a "
             "recession hit? LoanLens scores the risk, explains it, and stress-tests the lender's decision. "
-            "Fill in the application on the left, or start from an example.</p>", unsafe_allow_html=True)
+            "Fill in the loan application, or start from an example.</p>", unsafe_allow_html=True)
 cols = st.columns([1, 1, 1, 2.6])
 for col, name in zip(cols, EXAMPLES):
     col.button(name, on_click=use_example, args=(name,), width="stretch")
